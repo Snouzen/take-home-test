@@ -26,16 +26,18 @@ export default function Page() {
 
   const sortAsc = () => {
     const sorted = [...dominoes].sort((a, b) => {
-      if (a[0] !== b[0]) return a[0] - b[0]
-      return a[1] - b[1]
+      const totalA = a[0] + a[1]
+      const totalB = b[0] + b[1]
+      return totalA === totalB ? a[0] - b[0] : totalA - totalB
     })
     setDominoes(sorted)
   }
 
   const sortDesc = () => {
     const sorted = [...dominoes].sort((a, b) => {
-      if (b[0] !== a[0]) return b[0] - a[0]
-      return b[1] - a[1]
+      const totalA = a[0] + a[1]
+      const totalB = b[0] + b[1]
+      return totalB === totalA ? b[0] - a[0] : totalB - totalA
     })
     setDominoes(sorted)
   }

@@ -1,103 +1,142 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { useState } from "react"
+
+type Domino = [number, number]
+
+const defaultData: Domino[] = [
+  [6, 1],
+  [4, 3],
+  [5, 1],
+  [3, 4],
+  [1, 1],
+  [3, 4],
+  [1, 2],
+  [2, 2],
+  [10, 10],
+]
+
+export default function Page() {
+  const [dominoes, setDominoes] = useState<Domino[]>([...defaultData])
+  const [removeInput, setRemoveInput] = useState('')
+
+  const countDouble = () => {
+    return dominoes.filter(([a, b]) => a === b).length
+  }
+
+  const sortAsc = () => {
+    const sorted = [...dominoes].sort((a, b) => {
+      if (a[0] !== b[0]) return a[0] - b[0]
+      return a[1] - b[1]
+    })
+    setDominoes(sorted)
+  }
+
+  const sortDesc = () => {
+    const sorted = [...dominoes].sort((a, b) => {
+      if (b[0] !== a[0]) return b[0] - a[0]
+      return b[1] - a[1]
+    })
+    setDominoes(sorted)
+  }
+
+  const flipCards = () => {
+    setDominoes(dominoes.map(([a, b]) => [b, a]))
+  }
+
+  const removeDuplicates = () => {
+    const seen = new Set<string>()
+    const unique = dominoes.filter(([a, b]) => {
+      const key1 = `${a},${b}`
+      const key2 = `${b},${a}`
+      if (seen.has(key1) || seen.has(key2)) return false
+      seen.add(key1)
+      return true
+    })
+    setDominoes(unique)
+  }
+
+  const reset = () => setDominoes([...defaultData])
+
+  const validValues = Array.from (
+    new Set(defaultData.map(([a, b]) => a + b))
+  )
+
+  const inputValid = !isNaN(parseInt(removeInput)) && validValues.includes(parseInt(removeInput))
+
+  const removeBySum = () => {
+    const num = parseInt(removeInput)
+    if (!isNaN(num) && validValues.includes(num)) {
+      const filtered = dominoes.filter(([a, b]) => a + b !== num)
+      setDominoes(filtered)
+    } else {
+      false
+    }
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="p-8 max-w-2xl mx-auto bg-white">
+      <h1 className="text-3xl font-bold mb-4">Dominoes</h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <div className="mb-4">
+        <h2 className="font-semibold">Source</h2>
+        <pre className="bg-gray-100 p-2 rounded">{JSON.stringify(dominoes)}</pre>
+      </div>
+
+      <div className="mb-4">
+        <h2 className="font-semibold">Double Numbers</h2>
+        <pre className="bg-gray-100 p-2 rounded">{countDouble()}</pre>
+      </div>
+
+      <div className="flex flex-wrap gap-3 my-6">
+        {dominoes.map(([a, b], i) => (
+          <div
+            key={i}
+            className="w-12 h-20 border border-gray-400 rounded bg-white flex flex-col items-center justify-center shadow-sm"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+            <div className="text-sm font-semibold">{a}</div>
+            <div className="text-xs">-</div>
+            <div className="text-sm font-semibold">{b}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-4">
+        <button onClick={sortAsc} className="btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+          Sort (ASC)
+        </button>
+        <button onClick={sortDesc} className="btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+          Sort (DESC)
+        </button>
+        <button onClick={flipCards} className="btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+          Flip
+        </button>
+        <button onClick={removeDuplicates} className="btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+          Remove Duplicate
+        </button>
+        <button onClick={reset} className="btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+          Reset
+        </button>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          className="border p-2 rounded w-32"
+          placeholder="Input Number"
+          value={removeInput}
+          onChange={(e) => setRemoveInput(e.target.value)}
+        />
+        <button
+        onClick={removeBySum}
+        disabled={!inputValid}
+        className={`btn px-4 py-2 rounded text-white ${
+          inputValid ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-300 cursor-not-allowed'
+        }`}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          Remove
+        </button>
+      </div>
     </div>
-  );
+  )
 }
